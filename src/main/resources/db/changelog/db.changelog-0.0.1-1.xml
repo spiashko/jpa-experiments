@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+    <changeSet author="siarhei.piashko" id="changelog-001-company">
+        <sql>
+            create table company (
+            id SERIAL PRIMARY KEY,
+
+            created_on TIMESTAMP WITH TIME ZONE NOT NULL,
+            created_by INTEGER NOT NULL,
+            last_modified_on TIMESTAMP WITH TIME ZONE NOT NULL,
+            last_modified_by INTEGER NOT NULL,
+
+            name TEXT NOT NULL
+            );
+        </sql>
+        <rollback>
+            drop table company;
+        </rollback>
+    </changeSet>
+
+    <changeSet author="siarhei.piashko" id="changelog-001-operation">
+        <sql>
+            create table employee (
+            id SERIAL PRIMARY KEY,
+
+            created_on TIMESTAMP WITH TIME ZONE NOT NULL,
+            created_by INTEGER NOT NULL,
+            last_modified_on TIMESTAMP WITH TIME ZONE NOT NULL,
+            last_modified_by INTEGER NOT NULL,
+
+            fk_company INTEGER NOT NULL REFERENCES company (id),
+
+            name TEXT NOT NULL
+            );
+        </sql>
+        <rollback>
+            drop table employee;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
