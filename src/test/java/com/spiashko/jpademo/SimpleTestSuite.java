@@ -1,14 +1,14 @@
 package com.spiashko.jpademo;
 
-import com.spiashko.jpademo.entity.Company;
-import com.spiashko.jpademo.entity.Employee;
-import com.spiashko.jpademo.repo.CompanyRepository;
+import com.spiashko.jpademo.simple.Company;
+import com.spiashko.jpademo.simple.CompanyRepository;
+import com.spiashko.jpademo.simple.Employee;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public class TestSuite2 extends AbstractApplicationTest {
+public class SimpleTestSuite extends AbstractApplicationTest {
 
     @Autowired
     private CompanyRepository companyRepository;

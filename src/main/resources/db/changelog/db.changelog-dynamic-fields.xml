@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet author="siarhei.piashko" id="changelog-dynamic-fields-person">
+        <sql>
+            CREATE TABLE person
+            (
+                id TEXT PRIMARY KEY
+            );
+        </sql>
+        <rollback>
+            drop table person;
+        </rollback>
+    </changeSet>
+
+    <changeSet author="siarhei.piashko" id="changelog-dynamic-fields-person-field">
+        <sql>
+            CREATE TABLE person_field
+            (
+                id        TEXT PRIMARY KEY,
+
+                fk_person TEXT NOT NULL REFERENCES person (id),
+
+                name      TEXT NOT NULL,
+                value     TEXT NOT NULL
+            );
+        </sql>
+        <rollback>
+            drop table person_field;
+        </rollback>
+    </changeSet>
+
+    <changeSet author="siarhei.piashko" id="changelog-dynamic-fields-populate-person-data">
+        <sql>
+            INSERT INTO person (id)
+            VALUES ('person1');
+
+            INSERT INTO person (id)
+            VALUES ('person2');
+
+            INSERT INTO person (id)
+            VALUES ('person0');
+        </sql>
+        <rollback>
+            delete from person;
+        </rollback>
+    </changeSet>
+
+
+    <changeSet author="siarhei.piashko" id="changelog-dynamic-fields-populate-person-field-data">
+        <sql>
+            INSERT INTO person_field (id, fk_person, name, value)
+            VALUES ('1-fn', 'person1', 'firstname', 'fn person 1');
+
+            INSERT INTO person_field (id, fk_person, name, value)
+            VALUES ('1-ln', 'person1', 'lastname', 'ln person 1');
+
+            INSERT INTO person_field (id, fk_person, name, value)
+            VALUES ('2-fn', 'person2', 'firstname', 'fn person 2');
+
+            INSERT INTO person_field (id, fk_person, name, value)
+            VALUES ('2-ln', 'person2', 'lastname', 'ln person 2');
+
+            INSERT INTO person_field (id, fk_person, name, value)
+            VALUES ('0-fn', 'person0', 'firstname', 'fn person 0');
+
+            INSERT INTO person_field (id, fk_person, name, value)
+            VALUES ('0-ln', 'person0', 'lastname', 'ln person 0');
+        </sql>
+        <rollback>
+            delete from person_field;
+        </rollback>
+    </changeSet>
+
+
+</databaseChangeLog>

@@ -18,7 +18,9 @@ public class ITInitializer implements ApplicationContextInitializer<Configurable
 
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 
-        postgreSQLContainer.isShouldBeReused();
+        postgreSQLContainer.withReuse(true);
+
+        log.info("reuse=" + postgreSQLContainer.isShouldBeReused());
 
         postgreSQLContainer.start();
 
