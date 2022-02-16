@@ -4,54 +4,56 @@ import com.spiashko.jpademo.dynamicfields.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.criteria.ListJoin;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Map;
 
 @Sql(scripts = {"classpath:sql-test-data/dynamic-fields-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class DynamicFieldsTestSuite extends AbstractApplicationTest {
 
-    @Autowired
-    private PersonRepository repository;
+    private static final String selectSql = """
+            select *
+            from person p
+                     left join (select * from person_field pf where pf.name = 'kek') lpf on p.id = lpf.fk_person
+            order by lpf.name
+            """;
 
     @Autowired
-    private TransactionTemplate transactionTemplate;
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private PersonRepository repository;
 
     @Test
     public void complexTest() {
 
-        doInTransaction(() -> {
-            List<Person> people = repository.findAll((root, query, builder) -> {
+        List<Map<String, Object>> peopleFromRawSql = jdbcTemplate.queryForList(selectSql);
 
-                ListJoin<Person, PersonField> join = root.join(Person_.personFields);
-                query
-                        .where(builder.equal(join.get(PersonField_.NAME), "firstname"))
-                        .orderBy(
-                                builder.asc(join.get(PersonField_.VALUE))
-                        );
+        Assertions.assertEquals(3, peopleFromRawSql.size());
 
-                return query.getRestriction();
-            });
+        List<Person> people = repository.findAll((root, query, builder) -> {
 
-            Assertions.assertEquals(3, people.size());
+            ListJoin<Person, PersonField> join = root.join(Person_.personFields);
+            query
+                    .where(builder.equal(join.get(PersonField_.NAME), "kek"))
+                    .orderBy(
+                            builder.asc(join.get(PersonField_.VALUE))
+                    );
 
-            return people;
+            return query.getRestriction();
         });
 
+        Assertions.assertEquals(3, people.size());
     }
 
-    /*
-    Select * from participant p left join (select * from participant_field pf where pf.fieldname= ‘dhdhhd’) LPF on p.ID = LPF.participant_id where p.monitoring_id = 5449002 and p.configuration=100 order by LPF.fieldname ;
+    /*sql
+    // ;
      */
 
     /*
-    Select *from participant left join participant_field pf on p.Id = pf.participant_id where p.Id In (2224532,234728,6272739)
+    select *from participant left join participant_field pf on p.Id = pf.participant_id where p.Id In (2224532,234728,6272739)
      */
-
-    private <T> T doInTransaction(Supplier<T> supplier) {
-        return transactionTemplate.execute((status) -> supplier.get());
-    }
 }

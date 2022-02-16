@@ -23,7 +23,7 @@ spring:
       #javax.persistence.schema-generation.scripts.action: create
       #javax.persistence.schema-generation.scripts.create-target: create.sql
   liquibase:
-    change-log: classpath:config/liquibase/master.xml
+    change-log: classpath:db/changelog/db.changelog-master.xml
 
 logging:
   level:
