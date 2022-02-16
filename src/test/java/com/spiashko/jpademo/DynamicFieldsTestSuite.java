@@ -4,12 +4,14 @@ import com.spiashko.jpademo.dynamicfields.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.criteria.ListJoin;
 import java.util.List;
 import java.util.function.Supplier;
 
+@Sql(scripts = {"classpath:sql-test-data/dynamic-fields-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class DynamicFieldsTestSuite extends AbstractApplicationTest {
 
     @Autowired
@@ -42,24 +44,11 @@ public class DynamicFieldsTestSuite extends AbstractApplicationTest {
     }
 
     /*
--- fetch join sql
-with ordered_people as (
-    SELECT distinct p.id,
-                    pf.name,
-                    pf.value,
-                    row_number() over (order by pf.value) as row
-    from person p
-             join person_field pf on p.id = pf.fk_person
-    where pf.name = 'firstname'
-    LIMIT 10 OFFSET 0
-)
-SELECT distinct op.id,
-                pf.name,
-                pf.value,
-                row
-from ordered_people op
-     join person_field pf on op.id = pf.fk_person
-order by row
+    Select * from participant p left join (select * from participant_field pf where pf.fieldname= ‘dhdhhd’) LPF on p.ID = LPF.participant_id where p.monitoring_id = 5449002 and p.configuration=100 order by LPF.fieldname ;
+     */
+
+    /*
+    Select *from participant left join participant_field pf on p.Id = pf.participant_id where p.Id In (2224532,234728,6272739)
      */
 
     private <T> T doInTransaction(Supplier<T> supplier) {

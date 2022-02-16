@@ -30,4 +30,6 @@ build/
 ### VS Code ###
 .vscode/
 
+create.sql
+
 _infrastructure/postgres/datadir
