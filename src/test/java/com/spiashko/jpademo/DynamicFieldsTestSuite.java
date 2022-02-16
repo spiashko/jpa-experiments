@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,8 @@ public class DynamicFieldsTestSuite extends AbstractApplicationTest {
     private static final String selectSql = """
             select *
             from person p
-                     left join (select * from person_field pf where pf.name = 'kek') lpf on p.id = lpf.fk_person
-            order by lpf.name
+                     left join person_field pf on p.id = pf.fk_person and pf.name = 'firstname'
+            order by pf.value
             """;
 
     @Autowired
@@ -35,10 +36,10 @@ public class DynamicFieldsTestSuite extends AbstractApplicationTest {
         Assertions.assertEquals(3, peopleFromRawSql.size());
 
         List<Person> people = repository.findAll((root, query, builder) -> {
-
-            ListJoin<Person, PersonField> join = root.join(Person_.personFields);
+            ListJoin<Person, PersonField> join = root.join(Person_.personFields, JoinType.LEFT);
+            join.on(builder.equal(join.get(PersonField_.name), "firstname"));
             query
-                    .where(builder.equal(join.get(PersonField_.NAME), "kek"))
+                    .where()
                     .orderBy(
                             builder.asc(join.get(PersonField_.VALUE))
                     );
