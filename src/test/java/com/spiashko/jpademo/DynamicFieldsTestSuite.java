@@ -10,6 +10,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
+import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,29 +46,27 @@ public class DynamicFieldsTestSuite extends AbstractApplicationTest {
         List<Map<String, Object>> peopleFromRawFilterSql = jdbcTemplate.queryForList(filterSelectSql);
         Assertions.assertEquals(1, peopleFromRawFilterSql.size());
 
-        List<Person> peopleFromFilterCriteria = repository.findAll(prepareFilterSpec());
+        List<Person> peopleFromFilterCriteria = repository.findAll(
+                prepareFilterSpec(
+                        new FieldNameValue("firstname", "fn person 1"),
+                        new FieldNameValue("lastname", "ln person 1")
+                )
+        );
         Assertions.assertEquals(1, peopleFromFilterCriteria.size());
 
     }
 
-    private Specification<Person> prepareFilterSpec() {
+    private Specification<Person> prepareFilterSpec(FieldNameValue... fields) {
         return (root, query, builder) -> {
-            ListJoin<Person, PersonField> join1 = root.join(Person_.personFields, JoinType.LEFT);
-            ListJoin<Person, PersonField> firstname = join1.on(builder.equal(join1.get(PersonField_.name), "firstname"));
+            List<Predicate> allPredicates = new ArrayList<>();
 
-            ListJoin<Person, PersonField> join2 = root.join(Person_.personFields, JoinType.LEFT);
-            ListJoin<Person, PersonField> lastname = join2.on(builder.equal(join2.get(PersonField_.name), "lastname"));
+            for (FieldNameValue field : fields) {
+                ListJoin<Person, PersonField> join = root.join(Person_.personFields, JoinType.LEFT);
+                join.on(builder.equal(join.get(PersonField_.name), field.name()));
+                allPredicates.add(builder.equal(join.get(PersonField_.VALUE), field.value()));
+            }
 
-            query
-                    .where(
-                            builder.and(
-                                    builder.equal(firstname.get(PersonField_.VALUE), "fn person 1"),
-                                    builder.equal(lastname.get(PersonField_.VALUE), "ln person 1")
-                            )
-
-                    );
-
-            return query.getRestriction();
+            return builder.and(allPredicates.toArray(allPredicates.toArray(new Predicate[0])));
         };
 
     }
@@ -99,6 +99,8 @@ public class DynamicFieldsTestSuite extends AbstractApplicationTest {
 
             return query.getRestriction();
         };
+    }
 
+    private record FieldNameValue(String name, String value) {
     }
 }
