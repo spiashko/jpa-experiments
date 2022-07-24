@@ -38,7 +38,7 @@
 
                 fk_company       INTEGER                  NOT NULL REFERENCES company (id),
 
-                name             TEXT                     NOT NULL
+                name             TEXT UNIQUE              NOT NULL
             );
         </sql>
         <rollback>
